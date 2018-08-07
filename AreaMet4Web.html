@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AreaMet 4.0</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+.modal {
+    display:    none;
+    position:   fixed;
+    z-index:    1000;
+    top:        0;
+    left:       0;
+    height:     100%;
+    width:      100%;
+    background: rgba( 255, 255, 255, .8) 
+                url('FhHRx.gif') 
+                50% 50% 
+                no-repeat;
+}
+body.loading {
+    overflow: hidden;   
+}
+
+/* display the modal when loading class is added to body */
+body.loading .modal {
+    display: block;
+}
+
+
+</style>
+<script>
+var src;
+var dst;
+var Escala=1.0;
+var fileName="";
+function calcArea(){
+         src = cv.imread(imgElement);
+         var displayMat=src.clone();
+         var trh=parseInt(document.getElementById("txt1").value);
+         var c=document.getElementById("imageCanvas");
+         var x=document.getElementById('imageSrc');
+         c.width=x.width;
+         c.height=x.height;
+         
+         dst = cv.Mat.zeros(src.cols, src.rows, cv.CV_8UC3);
+         //cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+         cv.threshold(src, src, trh, 255, cv.THRESH_BINARY);
+         let contours = new cv.MatVector();
+         let hierarchy = new cv.Mat();
+
+         cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+        
+
+         var x=document.getElementById("mySelect");
+         x.length=0;
+         for (let i = 0; i < contours.size(); ++i) {
+            let cnt = contours.get(i);
+            let area = cv.contourArea(cnt, false);
+            
+           
+            
+            let color2 = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),Math.round(Math.random() * 255));
+            cv.drawContours(dst, contours, i, color2, 2, cv.LINE_8, hierarchy, 100);
+            
+
+            let M = cv.moments(cnt, false);
+          
+            let perimeter = cv.arcLength(cnt, true);
+            var x=document.getElementById("mySelect");
+            var option=document.createElement("option");
+            option.text=i.toString()+":"+area.toString();
+            option.value=i;
+            x.add(option);
+           
+         
+            
+              
+            if(M.m00!=0){
+              let cx = parseInt(M.m10/M.m00);
+              let cy = parseInt(M.m01/M.m00);
+              
+              font = cv.FONT_HERSHEY_SIMPLEX;
+            
+              let center = new cv.Point(cx, cy);
+              cv.circle(dst, center, 5, [0, 255, 0, 255], 1);
+              cv.putText(dst, i.toString(), {x: cx, y: cy}, cv.FONT_HERSHEY_SIMPLEX, 0.5, [0, 255, 0, 255]);
+                }
+            }
+             
+       
+         cv.imshow('imageCanvas',dst);
+         src.delete(); dst.delete(); contours.delete(); hierarchy.delete(),displayMat.delete();
+
+}
+function calcArea2(cn){
+         //var cn=parseInt(document.getElementById("mySelect").value);
+         cn=parseInt(cn);
+         src = cv.imread(imgElement);
+         var displayMat=src.clone();
+         var trh=parseInt(document.getElementById("txt1").value);
+
+         dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+         cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+         cv.threshold(src, src, trh, 255, cv.THRESH_TOZERO);
+         let contours = new cv.MatVector();
+         let hierarchy = new cv.Mat();
+
+         cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+         
+         
+            let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),Math.round(Math.random() * 255));
+            
+            
+            cv.drawContours(dst, contours, cn, color, 1, cv.LINE_8, hierarchy, 0);
+
+            let cnt = contours.get(cn);
+
+            let M = cv.moments(cnt, false);
+            let area = cv.contourArea(cnt, false);
+            let perimeter = cv.arcLength(cnt, true);
+            
+            
+            
+              
+            let cx = M.m10/M.m00
+            let cy = M.m01/M.m00
+            
+           
+             
+        
+         cv.imshow('imageCanvas', dst);
+         src.delete(); dst.delete(); contours.delete(); hierarchy.delete();displayMat.delete();
+
+}
+function myFunc(){
+     x=document.getElementById("mySelect");
+ 
+     calcArea2(parseInt(x.value));
+     
+
+}
+
+function onOpenCvReady() {
+           document.body.classList.remove("loading");
+  }
+
+function filterHSV(){
+  var trh=parseInt(document.getElementById("txt1").value);
+  let src = cv.imread(imgElement);
+  let dst = new cv.Mat();
+  let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
+  let high = new cv.Mat(src.rows, src.cols, src.type(), [255, trh, 255, 255]);
+ 
+  cv.inRange(src, low, high, dst);
+  cv.imshow('imageCanvas', dst);
+  src.delete(); dst.delete(); low.delete(); high.delete();
+
+
+
+}
+
+function Threshold(){
+let src = cv.imread(imgElement);
+
+let ksize = new cv.Size(3, 3);
+let anchor = new cv.Point(-1, -1);
+//let dst = new cv.Mat();
+let dst=src.clone();
+let blur = new cv.Mat();
+
+ var trh=parseInt(document.getElementById("txt1").value);
+
+
+
+let low = new cv.Mat(src.rows, src.cols, src.type(), [0, 0, 0, 0]);
+let high = new cv.Mat(src.rows, src.cols, src.type(), [255, trh, 255, 255]);
+
+   //cv.blur(src, src, ksize, anchor, cv.BORDER_DEFAULT);
+
+  
+ 
+  //dst = cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
+
+
+// You can try more different parameters
+  //cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+  //cv.threshold(src, src, trh, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU);
+  //cv.threshold(src, src, trh, 255, cv.THRESH_TOZERO);
+
+  cv.inRange(src, low, high, src);
+  //cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
+
+  let contours = new cv.MatVector();
+  let hierarchy = new cv.Mat();
+
+  cv.findContours(src, contours, hierarchy, cv.RETR_CCOMP, cv.CHAIN_APPROX_SIMPLE);
+
+  var x=document.getElementById("mySelect");
+  x.length=0;
+  var areaMin=document.getElementById("areaMin").value;
+  for (let i = 0; i < contours.size(); ++i) {
+            let cnt = contours.get(i);
+            let area = cv.contourArea(cnt, false);
+            
+            let color = new cv.Scalar(Math.round(Math.random() * 255), Math.round(Math.random() * 255),Math.round(Math.random() * 255),255);
+            
+           
+
+            if(area>areaMin){
+                 
+                 var xarea=area*Escala;
+                 cv.drawContours(dst, contours, i, color, 1, cv.LINE_8, hierarchy, 100);
+                 var option=document.createElement("option");
+                 var s=area.toFixed(1).toString();
+                 var n=20-s.length;
+                 var g="#";
+                
+                 option.text="     "+s+"========>>"+xarea.toFixed(2).toString();
+                 option.value=area;
+                 option.style.padding = n.toString()+'px';
+                 x.add(option);
+                 let M = cv.moments(cnt, false);
+                 if(M.m00!=0){
+                    let cx = parseInt(M.m10/M.m00);
+                    let cy = parseInt(M.m01/M.m00);
+              
+                     font = cv.FONT_HERSHEY_SIMPLEX;
+                     color=new cv.Scalar(0,0,0,255);
+                     let center = new cv.Point(cx, cy);
+                     cv.circle(dst, center, 5, color, 1);
+                    
+                     let xt = new cv.Point(cnt.data32S[0], cnt.data32S[1]-5);
+                     
+                     cv.putText(dst, xarea.toFixed(2).toString(), xt, cv.FONT_HERSHEY_SIMPLEX, 0.5, [0,0,250,255]);
+                     
+                for (let j = 0; j < cnt.data32S.length; j+=2) {
+                    let startPoint = new cv.Point(cnt.data32S[j], cnt.data32S[j+1]);
+                    
+                    cv.circle(dst, startPoint, 2, [0,0,255,255], 1);
+                   
+                    
+                }
+
+
+
+               }
+           
+
+
+
+              }
+
+   }
+
+
+cv.imshow('imageCanvas', dst);
+src.delete();
+dst.delete();
+
+
+
+
+
+
+
+
+}
+
+
+
+function rangeFunc(){
+  var x=document.getElementById("txt1");
+  var r=document.getElementById("r1");
+  x.value=r.value;
+  Threshold();
+
+}
+
+function patronCalc(){
+   var x=document.getElementById("mySelect");
+   var v=document.getElementById("patron");
+   Escala=parseFloat(v.value)/parseFloat(x.value);
+ 
+   Threshold();
+}
+
+function cutBkg(){
+let src = cv.imread('imageCanvas');
+let rect = new cv.Rect(50, 50, 260, 280);
+let th=150;
+for (let i = 0; i < src.rows; i++) {
+    for (let j = 0; j < src.cols; j++) {
+           
+            if(src.ucharPtr(i, j)[0]>th && src.ucharPtr(i, j)[1]>th && src.ucharPtr(i, j)[2]>th){
+                src.ucharPtr(i, j)[0] = 255;
+                src.ucharPtr(i, j)[1] = 255;
+                src.ucharPtr(i, j)[2] = 255;
+              }
+     
+    }
+}
+// draw grab rect
+let color = new cv.Scalar(0, 0, 255,255);
+let point1 = new cv.Point(rect.x, rect.y);
+let point2 = new cv.Point(rect.x + rect.width, rect.y + rect.height);
+cv.rectangle(src, point1, point2, color);
+cv.imshow('imageCanvas', src);
+src.delete();
+
+}
+
+</script>
+</head>
+<body>
+<CENTER>
+<h1>AREAMET-WEB 4.0</H1>
+<H2>Unachi-2018</h2>
+</CENTER>
+<img id="imageSrc" alt="No Image" style="border-style: solid;" />
+
+
+<canvas id="imageCanvas" style="border-style: solid;"></canvas><br>
+<input type="file" id="fileInput" name="file" />
+<br>
+<input type="range" value="180" min="0" max="255" step="1" onchange="rangeFunc();" id="r1" style="width:300px;">
+
+
+<input type="text" id="txt1" value=180><br>
+AreaMin:<input type="text" id="areaMin" value="1000"><br><br>
+<div >
+  <select id="mySelect" size="8" style="width:300px;" >
+      <option>AREAS</option>
+  </select>
+</div><br>
+<input type="text" id="patron" value=9.0><button onclick="patronCalc();">Patron</button><br>
+<button onclick="Threshold();">CalcArea</button><br><br>
+<a href="#" id="downloadButton">Download Image</a><br>
+<br>
+<h5>Pedro González Beermann-2018</h5>
+
+<script async src="opencv/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+
+<script type="text/javascript">
+    // Our JavaScript code will go here
+    document.body.classList.add("loading");
+
+
+   let imgElement = document.getElementById('imageSrc');
+   let inputElement = document.getElementById('fileInput');
+   let imageCanvas=document.getElementById("imageCanvas");
+
+   inputElement.onchange = function() {
+          imgElement = document.getElementById('imageSrc');
+          
+          fileName=event.target.files[0].name;
+          
+          imgElement.src = URL.createObjectURL(event.target.files[0]);
+          
+       };
+
+    imgElement.onload = function() {
+           Escala=1.0;
+           var w=imgElement.width;
+           var h=imgElement.height;
+
+           
+
+           imgElement.width=600;
+           
+
+           
+           Threshold();
+          
+           
+      };
+
+
+document.getElementById('downloadButton').onclick = function() {
+    this.href = document.getElementById("imageCanvas").toDataURL();
+    this.download = "Res"+fileName;
+        };
+
+
+
+
+</script>
+
+
+</body>
+</html>
