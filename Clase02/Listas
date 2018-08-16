@@ -1,1 +1,10 @@
+## Colecciones Python (Arrays)
 
+Hay cuatro tipos de datos de colección en el lenguaje de programación de Python:
+
+* La lista es una colección ordenada y modificable. Permite duplicar miembros
+* Tuple es una colección ordenada e inmutable. Permite duplicar miembros
+* Set es una colección desordenada y no indexada. No hay miembros duplicados.
+* El diccionario es una colección desordenada, modificable e indexada. No hay miembros duplicados.
+
+Al elegir un tipo de colección, es útil comprender las propiedades de ese tipo. Elegir el tipo correcto para un conjunto de datos en particular podría significar la retención de significado y, podría significar un aumento en la eficiencia o la seguridad.
